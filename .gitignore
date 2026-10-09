@@ -1,0 +1,19 @@
+# Secrets - never commit the API key
+Api.txt
+.env
+*.key
+
+# Original download folders (copied into data/ and schemas/)
+TensorForge 2.0 - MVP Resources DataSet/
+API specs and schemas/
+
+__pycache__/
+*.pyc
+.venv/
+.pytest_cache/
+jobs.db*
+*.db
+
+# Large / regenerated artifacts
+models/encoder/
+training/cache/

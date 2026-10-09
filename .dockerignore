@@ -1,0 +1,14 @@
+.git
+.venv
+**/__pycache__
+.pytest_cache
+Api.txt
+.env
+*.db
+models/encoder
+training/cache
+TensorForge 2.0 - MVP Resources DataSet
+API specs and schemas
+tests
+data
+docs

@@ -1,0 +1,17 @@
+Stage 1: category experiments (fit on train, score on validation)
+  E1 baseline: word TF-IDF + Complement NB                acc=0.5012 macroF1=0.5034 ece=0.2782
+  E2 word TF-IDF + LogReg                                 acc=0.5275 macroF1=0.5615 ece=0.1554
+  E3 char n-gram TF-IDF + LogReg                          acc=0.6262 macroF1=0.6466 ece=0.1477
+  E4 word+char TF-IDF + LinearSVC (calibrated)            acc=0.6462 macroF1=0.6755 ece=0.0608
+  E5 multilingual-e5 embeddings + LogReg                  acc=0.6900 macroF1=0.7019 ece=0.0300
+  E6 ensemble E4 + E5 (equal weights)                     acc=0.7650 macroF1=0.7856 ece=0.1896
+Stage 2: tuning the category ensemble on validation
+  chosen: emb C=100.0 weight_emb=0.5 temperature=0.6 macroF1=0.7856
+Stage 3: secondary and urgency heads
+  secondary: {'weight_emb': 0.7, 'threshold': 0.45, 'f1': 0.6218, 'precision': 0.9487, 'recall': 0.4625, 'exact_accuracy': 0.9437}
+  urgency: {'weight_emb': 0.5, 'threshold': 0.525, 'f1': 0.9231, 'precision': 0.9474, 'recall': 0.9}
+  human review: {'threshold': 0.61, 'target_auto_accuracy': 0.9, 'share_flagged': 0.3063, 'accuracy_auto_routed': 0.9027, 'accuracy_flagged': 0.4531}
+  VALIDATION: {"category_macro_f1": 0.7856, "secondary_f1": 0.6218, "secondary_precision": 0.9487, "secondary_recall": 0.4625, "secondary_exact_accuracy": 0.9437, "urgency_f1": 0.9231, "urgency_precision": 0.9474, "urgency_recall": 0.9, "spam_rule_violations": 0}
+  by language (acc): {'en': 0.7679, 'mixed': 0.75, 'si': 0.625, 'singlish': 0.88, 'ta': 0.75, 'tanglish': 0.8}
+Stage 4: refit on train + validation
+saved models/ticket_model.joblib (14.1 MB) in 59s
