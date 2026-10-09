@@ -12,3 +12,6 @@ API specs and schemas
 tests
 data
 docs
+models/encoder_ft
+models/ft_val_probs_*
+models/ft_heads.npy

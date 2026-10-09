@@ -12,11 +12,14 @@ COPY requirements.txt .
 RUN pip install torch==2.14.1 --index-url https://download.pytorch.org/whl/cpu \
  && pip install -r requirements.txt
 
-# 2. Bundle the multilingual encoder weights at BUILD time (pinned commit).
+# 2. Bundle the encoder at BUILD time: download the pinned base model, then apply our
+#    fine-tuned layer delta (models/encoder_ft_delta.safetensors) to build models/encoder_ft.
 #    The running container never needs internet access.
-COPY training/download_encoder.py training/download_encoder.py
+COPY training/download_encoder.py training/apply_delta.py training/
+COPY models/encoder_ft_delta.safetensors models/
 RUN python training/download_encoder.py \
- && rm -rf models/encoder/.cache models/encoder/onnx
+ && python training/apply_delta.py \
+ && rm -rf models/encoder models/encoder_ft/.cache models/encoder_ft/onnx models/encoder_ft_delta.safetensors
 
 # 3. Application code and the trained classifier artifact.
 COPY app app

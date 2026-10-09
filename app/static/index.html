@@ -284,7 +284,7 @@ function renderModel(m){
   const v=m.validation,h=v.heads,c=v.category;
   const stat=(k,val,sub)=>`<div class="panel stat" style="margin:0"><div class="muted">${k}</div><div class="v">${val}</div><div class="muted">${sub||""}</div></div>`;
   let html=`<div class="panel"><h2>Model ${esc(m.model_version)}</h2>
-   <p class="muted">TF-IDF word + character n-grams → logistic-regression heads for category, secondary category and urgency.
+   <p class="muted">Ensemble of TF-IDF word + character n-grams (calibrated LinearSVC) and a fine-tuned multilingual-e5 encoder, with heads for category, secondary category and urgency.
    Trained on ${m.data.train} tickets, validated on ${m.data.validation} held-out tickets, final model refit on both.
    Artifact SHA-256 <code>${esc((m.artifact.sha256||"").slice(0,16))}…</code></p>
    <div class="stats">${stat("Category macro-F1",pct(c.macro_f1),"validation")}${stat("Category accuracy",pct(c.accuracy),"validation")}
@@ -292,8 +292,8 @@ function renderModel(m){
    ${stat("Secondary exact",pct(h.secondary_exact_accuracy),`presence F1 ${pct(h.secondary_presence_f1)}`)}
    ${stat("Calibration error",(c.ece).toFixed(3),"ECE (lower is better)")}</div></div>`;
   html+=`<div class="panel"><h2>Training experiments (validation set)</h2><div class="tablewrap"><table><thead><tr><th>Experiment</th><th class="num">Accuracy</th><th class="num">Macro-F1</th><th class="num">ECE</th><th class="num">Log loss</th></tr></thead><tbody>`+
-    m.category_experiments.map(e=>`<tr><td>${esc(e.name)}</td><td class="num">${pct(e.accuracy)}</td><td class="num">${pct(e.macro_f1)}</td><td class="num">${e.ece.toFixed(3)}</td><td class="num">${e.log_loss.toFixed(3)}</td></tr>`).join("")+
-    `</tbody></table></div><p class="muted">Chosen after tuning: ${esc(m.category_choice.model)} with C=${m.category_choice.C}.</p></div>`;
+    m.category_experiments.map(e=>`<tr><td>${esc(e.name)}</td><td class="num">${pct(e.accuracy)}</td><td class="num">${pct(e.macro_f1)}</td><td class="num">${e.ece==null?"—":e.ece.toFixed(3)}</td><td class="num">${e.log_loss==null?"—":e.log_loss.toFixed(3)}</td></tr>`).join("")+
+    `</tbody></table></div><p class="muted">Chosen: ${esc(m.category_choice.model)}${m.category_choice.weight_emb!=null?` (encoder weight ${m.category_choice.weight_emb}, temperature ${m.category_choice.temperature})`:""}.</p></div>`;
   html+=`<div class="panel"><h2>Macro-F1 by language</h2>`+Object.entries(c.macro_f1_by_language).map(([l,s])=>`<div class="langbar"><span>${esc(l)}</span><div class="bar" style="margin:0"><i style="width:${100*s}%"></i></div><span class="num">${pct(s)}</span></div>`).join("")+`</div>`;
   html+=`<div class="panel"><h2>Per-class F1</h2>`+Object.entries(v.per_class_f1).map(([l,s])=>`<div class="langbar" style="grid-template-columns:170px 1fr 50px"><span>${esc(l)}</span><div class="bar" style="margin:0"><i style="width:${100*s}%"></i></div><span>${pct(s)}</span></div>`).join("")+`</div>`;
   const cm=v.confusion_matrix,max=Math.max(...cm.matrix.flat());

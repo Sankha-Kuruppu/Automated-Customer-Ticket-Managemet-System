@@ -1,0 +1,184 @@
+{
+  "per_epoch": [
+    {
+      "epoch": 1,
+      "ft_alone_acc": 0.7775,
+      "ft_alone_macro_f1": 0.7782,
+      "category": {
+        "weight_emb": 0.7,
+        "accuracy": 0.8325,
+        "macro_f1": 0.8384,
+        "log_loss": 0.771,
+        "ece": 0.2604,
+        "temperature": 0.5,
+        "ece_after_temp": 0.038,
+        "accuracy_by_language": {
+          "en": 0.8786,
+          "mixed": 0.9,
+          "si": 0.7188,
+          "singlish": 0.82,
+          "ta": 0.875,
+          "tanglish": 0.9
+        }
+      },
+      "secondary": {
+        "weight_emb": 0.3,
+        "threshold": 0.175,
+        "f1": 0.6325,
+        "precision": 1.0,
+        "recall": 0.4625
+      },
+      "urgency": {
+        "weight_emb": 0.7,
+        "threshold": 0.425,
+        "f1": 0.9686,
+        "precision": 0.9747,
+        "recall": 0.9625
+      }
+    },
+    {
+      "epoch": 2,
+      "ft_alone_acc": 0.8488,
+      "ft_alone_macro_f1": 0.8451,
+      "category": {
+        "weight_emb": 0.8,
+        "accuracy": 0.85,
+        "macro_f1": 0.8475,
+        "log_loss": 0.7261,
+        "ece": 0.2643,
+        "temperature": 0.5,
+        "ece_after_temp": 0.0308,
+        "accuracy_by_language": {
+          "en": 0.9036,
+          "mixed": 0.85,
+          "si": 0.8125,
+          "singlish": 0.755,
+          "ta": 0.9417,
+          "tanglish": 0.8
+        }
+      },
+      "secondary": {
+        "weight_emb": 1.0,
+        "threshold": 0.175,
+        "f1": 0.7724,
+        "precision": 0.8615,
+        "recall": 0.7
+      },
+      "urgency": {
+        "weight_emb": 0.7,
+        "threshold": 0.325,
+        "f1": 0.9811,
+        "precision": 0.9873,
+        "recall": 0.975
+      }
+    },
+    {
+      "epoch": 3,
+      "ft_alone_acc": 0.8788,
+      "ft_alone_macro_f1": 0.8684,
+      "category": {
+        "weight_emb": 0.9,
+        "accuracy": 0.8738,
+        "macro_f1": 0.8605,
+        "log_loss": 0.6365,
+        "ece": 0.229,
+        "temperature": 0.5,
+        "ece_after_temp": 0.0147,
+        "accuracy_by_language": {
+          "en": 0.875,
+          "mixed": 0.85,
+          "si": 0.9125,
+          "singlish": 0.78,
+          "ta": 0.9667,
+          "tanglish": 0.95
+        }
+      },
+      "secondary": {
+        "weight_emb": 0.7,
+        "threshold": 0.125,
+        "f1": 0.84,
+        "precision": 0.9,
+        "recall": 0.7875
+      },
+      "urgency": {
+        "weight_emb": 0.7,
+        "threshold": 0.7,
+        "f1": 0.9937,
+        "precision": 1.0,
+        "recall": 0.9875
+      }
+    },
+    {
+      "epoch": 4,
+      "ft_alone_acc": 0.865,
+      "ft_alone_macro_f1": 0.8576,
+      "category": {
+        "weight_emb": 0.85,
+        "accuracy": 0.865,
+        "macro_f1": 0.8573,
+        "log_loss": 0.6681,
+        "ece": 0.2493,
+        "temperature": 0.5,
+        "ece_after_temp": 0.0432,
+        "accuracy_by_language": {
+          "en": 0.8857,
+          "mixed": 0.85,
+          "si": 0.875,
+          "singlish": 0.765,
+          "ta": 0.9667,
+          "tanglish": 0.9
+        }
+      },
+      "secondary": {
+        "weight_emb": 1.0,
+        "threshold": 0.2,
+        "f1": 0.8533,
+        "precision": 0.9143,
+        "recall": 0.8
+      },
+      "urgency": {
+        "weight_emb": 1.0,
+        "threshold": 0.4,
+        "f1": 0.9937,
+        "precision": 1.0,
+        "recall": 0.9875
+      }
+    }
+  ],
+  "chosen": {
+    "epoch": 3,
+    "ft_alone_acc": 0.8788,
+    "ft_alone_macro_f1": 0.8684,
+    "category": {
+      "weight_emb": 0.9,
+      "accuracy": 0.8738,
+      "macro_f1": 0.8605,
+      "log_loss": 0.6365,
+      "ece": 0.229,
+      "temperature": 0.5,
+      "ece_after_temp": 0.0147,
+      "accuracy_by_language": {
+        "en": 0.875,
+        "mixed": 0.85,
+        "si": 0.9125,
+        "singlish": 0.78,
+        "ta": 0.9667,
+        "tanglish": 0.95
+      }
+    },
+    "secondary": {
+      "weight_emb": 0.7,
+      "threshold": 0.125,
+      "f1": 0.84,
+      "precision": 0.9,
+      "recall": 0.7875
+    },
+    "urgency": {
+      "weight_emb": 0.7,
+      "threshold": 0.7,
+      "f1": 0.9937,
+      "precision": 1.0,
+      "recall": 0.9875
+    }
+  }
+}

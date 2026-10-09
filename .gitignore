@@ -17,3 +17,5 @@ jobs.db*
 # Large / regenerated artifacts
 models/encoder/
 training/cache/
+models/encoder_ft/
+models/ft_val_probs_*.npz

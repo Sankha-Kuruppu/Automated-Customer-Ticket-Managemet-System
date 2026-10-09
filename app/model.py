@@ -70,6 +70,23 @@ def decide(bundle: dict, p_cat: np.ndarray, p_sec: np.ndarray, p_urg: np.ndarray
     return out
 
 
+class SoftmaxHead:
+    """Linear head from the fine-tuned encoder (training/finetune.py), applied with numpy."""
+
+    def __init__(self, W, b, scale, classes=None, sigmoid=False):
+        self.W, self.b, self.scale, self.sigmoid = np.asarray(W), np.asarray(b), float(scale), sigmoid
+        self.classes_ = np.array(classes) if classes is not None else np.array([0, 1])
+
+    def predict_proba(self, X):
+        z = (np.asarray(X) * self.scale) @ self.W.T + self.b
+        if self.sigmoid:
+            p = 1.0 / (1.0 + np.exp(-z[:, 0]))
+            return np.stack([1 - p, p], axis=1)
+        z = z - z.max(axis=1, keepdims=True)
+        e = np.exp(z)
+        return e / e.sum(axis=1, keepdims=True)
+
+
 def head_proba(head: dict, X_tfidf, X_emb) -> np.ndarray:
     """Weighted soft-vote of the TF-IDF model and the embedding model for one prediction head."""
     w = head["weight_emb"]
@@ -103,7 +120,7 @@ class TicketClassifier:
         self.sha256 = file_sha256(self.path)
         if encoder is None:
             from app.encoder import Encoder
-            encoder = Encoder()
+            encoder = Encoder(DEFAULT_MODEL_PATH.parent / self.bundle.get("encoder_dir", "encoder"))
         self.encoder = encoder
 
     def predict(self, tickets: list[dict]) -> list[dict]:
