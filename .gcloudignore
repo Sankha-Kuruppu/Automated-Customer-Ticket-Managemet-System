@@ -1,0 +1,20 @@
+# Files uploaded to Cloud Build for `gcloud run deploy --source .`
+# Only what the Dockerfile needs; secrets and local artifacts never leave the machine.
+.git
+.gitignore
+.gcloudignore
+.venv/
+**/__pycache__/
+.pytest_cache/
+*.db
+Api.txt
+.env
+_personal/
+TensorForge 2.0 - MVP Resources DataSet/
+API specs and schemas/
+models/encoder/
+models/encoder_ft/
+models/ft_val_probs_*.npz
+training/cache/
+data/
+tests/
