@@ -1,14 +1,6 @@
----
-title: RideEat Ticket Router
-emoji: 🎫
-colorFrom: blue
-colorTo: green
-sdk: docker
-app_port: 8000
-pinned: false
----
-
 # RideEat Ticket Router — TensorForge 2.0 Phase 2
+
+**Live service:** <https://synthex6-rideeat-router.azurewebsites.net> (demo UI and dashboard at `/`, API docs at `/docs`)
 
 A multilingual customer-support ticket **classification and routing** service for the fictional
 RideEat ride-hailing and food-delivery platform. For each ticket it predicts:
@@ -199,17 +191,26 @@ scripts/        smoke_test.py: end-to-end check against a local or hosted URL
 data/           RideEat synthetic train/validation sets
 ```
 
-## Deployment (Hugging Face Spaces)
+## Deployment
 
-This README's front matter configures a Docker Space on port 8000. Create a public Docker Space,
-add a **secret** `API_KEY`, and push this repository to it. The Space builds the same `Dockerfile`.
+The hosted service runs on **Azure App Service (Linux, B2: 2 vCPU, 3.5 GB RAM)**, region India South Central,
+from the exact image built by CI:
+
+1. `.github/workflows/docker-image.yml` builds the `Dockerfile` on every push to `master`, pushes it to
+   GitHub Container Registry (`ghcr.io/sankha-kuruppu/automated-customer-ticket-managemet-system:<commit-sha>`),
+   then starts the image with `--network none` and checks `/health` and `/predict`. That check proves
+   the container needs no internet at runtime.
+2. App Service runs that image, pinned to a commit SHA, with `WEBSITES_PORT=8000`, Always On, HTTPS only,
+   health check on `/health`, and `API_KEY` set as an application setting (never in the image or repo).
+
+Measured on the hosted instance: a 100-ticket synchronous batch in ~18 s, and a 4,800-ticket async job in about
+8 minutes (contract limit 30 minutes for 5,000), with `/health` p95 ≈ 0.5 s during the job (network latency included).
 
 ## Limitations
 
 * Mixed-script (0.85) and English (0.875) are now the weakest groups; English errors are mostly
   precedence cases (refund requested because of a delay, vague general inquiries).
 * Data is synthetic; real tickets would need fresh validation.
-* On free hosting the SQLite job store lives on ephemeral disk: a full container *replacement*
-  (not a process restart) loses job history.
-* The 5,000-ticket job takes ~3 min on a 12-core laptop; expect ~10–15 min on 2 vCPU
-  (contract limit: 30 min).
+* The SQLite job store lives on the container's local disk: a full container *replacement*
+  (for example a redeploy) loses job history; a process restart marks running jobs `interrupted`.
+* Throughput on 2 vCPU is about 10 tickets/s (5,000 tickets ≈ 8.5 min; contract limit 30 min).
