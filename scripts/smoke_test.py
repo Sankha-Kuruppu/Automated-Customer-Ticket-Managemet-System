@@ -57,7 +57,14 @@ def main():
     tickets = tickets[:5000]
     truth = {f"{r['ticket_id']}#{k}": r for k in range(args.repeat) for r in rows}
 
-    s, _, b = call("GET", "/health", headers={"X-API-Key": ""})
+    print(f"Target: {BASE}")
+    if not KEY:
+        sys.exit("API_KEY is not set. Set BASE_URL and API_KEY first, for example (PowerShell):\n"
+                 '  $env:BASE_URL="https://<host>"\n  $env:API_KEY="<key>"')
+    try:
+        s, _, b = call("GET", "/health", headers={"X-API-Key": ""}, timeout=30)
+    except urllib.error.URLError as e:
+        sys.exit(f"Cannot reach {BASE} ({e.reason}). Is the service running, and is BASE_URL set correctly?")
     check("health 200", s == 200, str(b))
     version = (b or {}).get("model_version")
 
