@@ -19,3 +19,6 @@ models/encoder/
 training/cache/
 models/encoder_ft/
 models/ft_val_probs_*.npz
+
+# Personal notes (project guide, video script, report draft): never pushed
+_personal/

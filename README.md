@@ -193,7 +193,6 @@ models/         ticket_model.joblib, encoder_ft_delta.safetensors, metrics.json,
 schemas/        official OpenAPI contract + JSON Schemas used by the tests
 tests/          pytest contract tests
 scripts/        smoke_test.py: end-to-end check against a local or hosted URL
-docs/           report, video script, project guide
 data/           RideEat synthetic train/validation sets
 ```
 

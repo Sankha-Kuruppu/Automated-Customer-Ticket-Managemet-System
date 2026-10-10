@@ -8,7 +8,7 @@ Design:
   urgency binary). Loss = CE(category) + 0.5 CE(secondary) + 0.5 BCE(urgency), label smoothing 0.1.
 * The 96M-parameter word-embedding matrix is frozen. Only the 12 transformer layers (~21M params)
   are trained, which (a) regularises: rare Sinhala/Tamil sub-words keep their pretrained vectors,
-  and (b) keeps the artifact small: we store only the changed layers as a ~40 MB fp16 delta
+  and (b) keeps the artifact small: we store only the changed layers as a ~42 MB fp16 delta
   (models/encoder_ft_delta.safetensors) applied on top of the pinned base model at build time.
 * Heads read the same mean-pooled, L2-normalised vector the serving Encoder produces, so serving
   can apply them with numpy (see app.model.SoftmaxHead).
@@ -174,7 +174,7 @@ def save_artifacts(model, sec_classes, history):
     # 1. encoder delta: transformer layers only (embeddings were frozen), fp16
     delta = {f"encoder.{k}": v.detach().half().contiguous() for k, v in model.enc.encoder.state_dict().items()}
     save_file(delta, str(OUT / "encoder_ft_delta.safetensors"))
-    # 2. heads as plain numpy (applied by app.model.SoftmaxHead / SigmoidHead)
+    # 2. heads as plain numpy (applied by app.model.SoftmaxHead; urgency uses sigmoid=True)
     heads = {
         "scale": SCALE,
         "category": {"W": model.cat.weight.detach().numpy(), "b": model.cat.bias.detach().numpy(), "classes": CAT_SORTED},

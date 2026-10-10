@@ -1,7 +1,12 @@
-"""Can a stacking meta-model beat the fixed-weight ensemble? Honest 5-fold CV on validation.
+"""Rejected experiment: stacking meta-model over the TF-IDF and fine-tuned-encoder probabilities.
 
 Inputs per ticket: TF-IDF and fine-tuned-encoder probabilities (both from train-only models)
-plus script features (share of Latin / Sinhala / Tamil characters). The language label is NOT used.
+plus script features (share of Latin / Sinhala / Tamil characters). The language label is not used.
+
+The meta-model is scored with 5-fold CV inside the validation split and reaches ~0.97 accuracy.
+This is NOT a usable estimate: a plain TF-IDF model trained inside validation also reaches ~0.94
+(vs ~0.65 when trained on train), i.e. validation reuses its own templates and the folds leak.
+Kept for reproducibility of the report; the production model does not use stacking.
 """
 import re
 import sys

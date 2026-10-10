@@ -249,7 +249,6 @@ async def submit_job(request: Request):
     errs = validate_batch(body, JOB_MAX)
     if errs:
         raise validation_error(errs)
-    S.loaded.wait(timeout=0)  # do not block; version may still be loading
     version = S.model.model_version if S.model else None
     idem = request.headers.get("idempotency-key")
     idem = idem[:128] if idem else None

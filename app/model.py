@@ -90,9 +90,9 @@ class SoftmaxHead:
 def head_proba(head: dict, X_tfidf, X_emb, roman=None) -> np.ndarray:
     """Weighted soft-vote of the TF-IDF model and the embedding model for one prediction head.
 
-    If the head has `weight_emb_roman` and a romanised-script mask is given (Singlish/Tanglish,
-    detected from the text), those tickets use that weight instead: TF-IDF character n-grams are
-    much stronger than the encoder on romanised Sinhala/Tamil.
+    If the head has `weight_emb_roman` and a romanised-text mask is given (languages listed in
+    bundle["lang_id"]["romanised"], detected from the text), those tickets use that weight
+    instead: TF-IDF character n-grams are much stronger than the encoder on Singlish.
     """
     w = head["weight_emb"]
     if roman is not None and head.get("weight_emb_roman") is not None:
@@ -104,7 +104,7 @@ def head_proba(head: dict, X_tfidf, X_emb, roman=None) -> np.ndarray:
 
 
 def romanised_mask(bundle: dict, texts: list[str]):
-    """True where the trained language-ID model predicts Singlish/Tanglish (None if not in bundle)."""
+    """True where the language-ID model predicts a romanised language (None if not in bundle)."""
     lid = bundle.get("lang_id")
     if lid is None:
         return None

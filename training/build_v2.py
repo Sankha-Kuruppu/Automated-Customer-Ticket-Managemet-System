@@ -1,4 +1,7 @@
-"""Package model v2: TF-IDF heads (refit on train + validation) + fine-tuned encoder heads.
+"""Package model v2.x: TF-IDF heads + fine-tuned encoder heads + language-aware mixing.
+
+Selection (ensemble weights, Singlish weight, temperature, thresholds) uses models fit on train
+and scored on validation; the shipped components are then refit on train + validation.
 
 Pipeline (see README "How it was trained"):
     python -m training.train                              # v1 experiments + metrics.json
@@ -43,8 +46,8 @@ def main():
     tc, tsec, turg = tfidf_val_probs()
     d = np.load(MODELS / f"ft_val_probs_ep{ep}.npz")
     sec_classes = [str(c) for c in d["sec_classes"]]
-    # Language-aware weighting (v2.1): a language-ID model trained on TRAIN predicts whether a
-    # ticket is romanised Sinhala/Tamil; those tickets get their own ensemble weight.
+    # Language-aware weighting (v2.1): a language-ID model trained on train predicts whether a
+    # ticket is Singlish; those tickets get their own ensemble weight for the category head.
     Xtr_raw, Xva_raw = to_xy(train)[0], to_xy(val)[0]
     lid_vec = char_vec()
     lid = lr(10.0).fit(lid_vec.fit_transform(Xtr_raw), to_xy(train)[4])
