@@ -90,7 +90,7 @@ jobs that were `running` become `failed` with `error.code = "interrupted"`.
 
 ---
 
-## Model (v2.0.0)
+## Model (v2.1.0)
 
 ```
                 ┌─ normalise (NFC, mask URLs/IDs/numbers) ─ TF-IDF word 1-2g + char_wb 2-5g ─ LinearSVC (sigmoid-calibrated) ─┐
@@ -98,7 +98,10 @@ ticket ─────────┤                                           
                 └─ "query: " + subject + text ─ multilingual-e5-small, FINE-TUNED by us (multi-task) ─ linear heads ─────────┘
 ```
 
-Three heads (category, secondary-with-"none", urgency) share this structure. The encoder is
+Three heads (category, secondary-with-"none", urgency) share this structure. For the category head the
+mix is **language-aware**: a small character n-gram language-ID model (trained on the train split's
+`language` labels; at inference it only reads the text, 99.9 % accurate on validation) detects
+Singlish, and Singlish tickets lean on TF-IDF (encoder weight 0.1 instead of 0.9). The encoder is
 `intfloat/multilingual-e5-small` (pinned commit) fine-tuned on our tickets with three heads at once;
 its 96M-parameter vocabulary embedding matrix is frozen, so we only ship the changed transformer
 layers as a 42 MB delta (`models/encoder_ft_delta.safetensors`) that the Docker build applies to the
@@ -120,19 +123,20 @@ all metrics in `models/metrics.json` (also shown on the dashboard).
 | E5 | frozen multilingual-e5 embeddings + LogReg | 0.690 | 0.702 |
 | E6 (v1.1) | ensemble E4 + E5 | 0.765 | 0.786 |
 | E7 | **fine-tuned** e5, multi-task, epoch 3 of 4, alone | 0.879 | 0.868 |
-| **E8 (v2.0)** | **ensemble 0.1·E4 + 0.9·E7, temperature 0.5** | **0.874** | **0.861** |
+| E8 (v2.0) | ensemble 0.1·E4 + 0.9·E7 | 0.874 | 0.861 |
+| **E9 (v2.1)** | **E8 + language-aware weight (Singlish: 0.9·E4 + 0.1·E7), temperature 0.4** | **0.920** | **0.908** |
 
-Final v2.0 validation scores for every output:
+Final v2.1 validation scores for every output:
 
 | Output | Score |
 |---|---|
-| category | accuracy 0.874, macro-F1 0.861, **ECE 0.015** (well calibrated) |
+| category | accuracy **0.920**, macro-F1 **0.908**, **ECE 0.018** (well calibrated) |
 | is_urgent | **F1 0.994** (precision 1.000, recall 0.988) |
-| secondary_category | F1 0.840 (precision 0.900, recall 0.788); exact match incl. `null` 0.975 |
+| secondary_category | F1 0.876 (precision 0.918, recall 0.838); exact match incl. `null` 0.981 |
 | consistency rules | 0 violations (team table, spam rule, secondary ≠ primary) |
-| accuracy by language | en 0.875 · si 0.913 · ta 0.967 · singlish 0.780 · tanglish 0.950 · mixed 0.850 |
+| accuracy by language | en 0.875 · si 0.913 · ta 0.967 · singlish 0.965 · tanglish 0.950 · mixed 0.850 |
 
-**Why E8 rather than E7?** Our selection rule takes, among ensemble weights within 0.01 macro-F1 of
+**Why E8 rather than E7 as the base?** Our selection rule takes, among ensemble weights within 0.01 macro-F1 of
 the best, the one with the lowest log loss. Keeping 10 % TF-IDF costs 0.6 points of accuracy on
 validation but gives the best-calibrated probabilities and keeps a second, independent view of the
 text (character n-grams) as insurance, because the organisers say evaluation data may be
@@ -147,11 +151,18 @@ distributed differently.
 3. Meaning-based features generalise: frozen embeddings +4 points, an ensemble +12, and
    fine-tuning +23 points over the best lexical model.
 4. Epochs (fine-tuned alone, validation macro-F1): 1 → 0.778, 2 → 0.845, **3 → 0.868**, 4 → 0.858.
+5. The two models are strong on different languages: TF-IDF 0.96 vs encoder 0.78 on Singlish, the
+   reverse on English. Routing Singlish to TF-IDF (E9) adds 4.6 points overall. Tanglish was
+   deliberately excluded (only 100 training tickets; TF-IDF is weak there).
+6. Pitfall avoided: a stacking meta-model cross-validated *inside* validation scored 97 %, but a
+   plain TF-IDF model trained inside validation also scores 94 % (vs 65 % train → validation), so
+   validation has its own templates and within-validation CV leaks. We rejected stacking and only
+   tune a handful of weights/thresholds on validation.
 
 ### Human-review threshold (bonus field)
 
-`needs_human_review = confidence < 0.35`, the lowest cut-off at which auto-routed tickets reach
-90 % category accuracy on validation. It flags 3.75 % of tickets; flagged tickets are only 20 %
+`needs_human_review = confidence < 0.55`, the lowest cut-off at which auto-routed tickets reach
+95 % category accuracy on validation. It flags 7.5 % of tickets; flagged tickets are only 55 %
 accurate, so they are the right ones to send to a person.
 
 ### Reproduce
@@ -162,13 +173,13 @@ python -m training.train                                # E1-E6 experiments, v1 
 python -m training.finetune --mode eval --epochs 4      # ~10 min/epoch on a 12-core laptop CPU
 python -m training.ensemble_eval                        # choose epoch, weights, thresholds
 python -m training.finetune --mode final --epochs 3     # refit encoder on train + validation
-python -m training.build_v2                             # final bundle -> models/ticket_model.joblib
+python -m training.build_v2                             # language-aware final bundle -> models/ticket_model.joblib
 python training/apply_delta.py                          # local run: builds models/encoder_ft
 python -m pytest tests -q                               # 71 contract tests vs schemas/
 API_KEY=<key> BASE_URL=http://localhost:8000 python scripts/smoke_test.py
 ```
 
-`model_version` (`v2.0.0`) is stored inside `models/ticket_model.joblib`; the SHA-256 of the
+`model_version` (`v2.1.0`) is stored inside `models/ticket_model.joblib`; the SHA-256 of the
 bundle and of the encoder delta are recorded in `models/metrics.json` and shown on the dashboard.
 
 ---
@@ -193,8 +204,8 @@ add a **secret** `API_KEY`, and push this repository to it. The Space builds the
 
 ## Limitations
 
-* Singlish is now the weakest language (0.78), whereas TF-IDF alone reached 0.96 there.
-  A language-aware ensemble weight is the obvious next step.
+* Mixed-script (0.85) and English (0.875) are now the weakest groups; English errors are mostly
+  precedence cases (refund requested because of a delay, vague general inquiries).
 * Data is synthetic; real tickets would need fresh validation.
 * On free hosting the SQLite job store lives on ephemeral disk: a full container *replacement*
   (not a process restart) loses job history.

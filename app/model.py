@@ -87,13 +87,29 @@ class SoftmaxHead:
         return e / e.sum(axis=1, keepdims=True)
 
 
-def head_proba(head: dict, X_tfidf, X_emb) -> np.ndarray:
-    """Weighted soft-vote of the TF-IDF model and the embedding model for one prediction head."""
+def head_proba(head: dict, X_tfidf, X_emb, roman=None) -> np.ndarray:
+    """Weighted soft-vote of the TF-IDF model and the embedding model for one prediction head.
+
+    If the head has `weight_emb_roman` and a romanised-script mask is given (Singlish/Tanglish,
+    detected from the text), those tickets use that weight instead: TF-IDF character n-grams are
+    much stronger than the encoder on romanised Sinhala/Tamil.
+    """
     w = head["weight_emb"]
+    if roman is not None and head.get("weight_emb_roman") is not None:
+        w = np.where(roman, head["weight_emb_roman"], w)[:, None]
     p = (1.0 - w) * head["tfidf"].predict_proba(X_tfidf)
-    if w > 0:
+    if np.any(w > 0):
         p = p + w * head["emb"].predict_proba(X_emb)
     return apply_temperature(p, head.get("temperature", 1.0))
+
+
+def romanised_mask(bundle: dict, texts: list[str]):
+    """True where the trained language-ID model predicts Singlish/Tanglish (None if not in bundle)."""
+    lid = bundle.get("lang_id")
+    if lid is None:
+        return None
+    pred = lid["model"].predict(lid["vectorizer"].transform(texts))
+    return np.isin(pred, lid["romanised"])
 
 
 def apply_temperature(p: np.ndarray, t: float) -> np.ndarray:
@@ -104,11 +120,11 @@ def apply_temperature(p: np.ndarray, t: float) -> np.ndarray:
     return q / q.sum(axis=1, keepdims=True)
 
 
-def predict_features(bundle: dict, X_tfidf, X_emb) -> list[dict]:
+def predict_features(bundle: dict, X_tfidf, X_emb, roman=None) -> list[dict]:
     heads = bundle["heads"]
-    p_cat = head_proba(heads["category"], X_tfidf, X_emb)
-    p_sec = head_proba(heads["secondary"], X_tfidf, X_emb)
-    p_urg = head_proba(heads["urgency"], X_tfidf, X_emb)[:, 1]
+    p_cat = head_proba(heads["category"], X_tfidf, X_emb, roman)
+    p_sec = head_proba(heads["secondary"], X_tfidf, X_emb, roman)
+    p_urg = head_proba(heads["urgency"], X_tfidf, X_emb, roman)[:, 1]
     return decide(bundle, p_cat, p_sec, p_urg)
 
 
@@ -128,7 +144,8 @@ class TicketClassifier:
         texts = [build_input(t["channel"], t.get("subject"), t["text"]) for t in tickets]
         X_tfidf = self.bundle["vectorizer"].transform(texts)
         X_emb = self.encoder.encode([encoder_input(t.get("subject"), t["text"]) for t in tickets])
-        results = predict_features(self.bundle, X_tfidf, X_emb)
+        roman = romanised_mask(self.bundle, texts)
+        results = predict_features(self.bundle, X_tfidf, X_emb, roman)
         for r in results:
             r.pop("urgency_score", None)
             r["model_version"] = self.model_version
