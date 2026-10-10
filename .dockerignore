@@ -15,3 +15,5 @@ docs
 models/encoder_ft
 models/ft_val_probs_*
 models/ft_heads.npy
+_personal
+.gcloudignore
