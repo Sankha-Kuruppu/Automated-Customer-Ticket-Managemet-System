@@ -18,3 +18,4 @@ models/ft_val_probs_*.npz
 training/cache/
 data/
 tests/
+_personal*.zip
