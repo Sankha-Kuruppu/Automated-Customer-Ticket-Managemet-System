@@ -1,5 +1,4 @@
 * text=auto eol=lf
-*.joblib binary
-*.npy binary
 *.joblib filter=lfs diff=lfs merge=lfs -text
+*.npy binary
 *.safetensors filter=lfs diff=lfs merge=lfs -text

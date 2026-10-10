@@ -1,5 +1,5 @@
 {
-  "model_version": "v1.1.0",
+  "model_version": "v2.0.0",
   "data": {
     "train": 4000,
     "validation": 800,
@@ -19,7 +19,7 @@
     "train_secondary_rate": 0.1,
     "train_urgent_rate": 0.1
   },
-  "encoder": "intfloat/multilingual-e5-small (frozen, mean-pooled, L2-normalised)",
+  "encoder": "intfloat/multilingual-e5-small, fine-tuned multi-task (embeddings frozen)",
   "category_experiments": [
     {
       "name": "E1 baseline: word TF-IDF + Complement NB",
@@ -158,6 +158,20 @@
         "ta": 0.75,
         "tanglish": 0.8
       }
+    },
+    {
+      "name": "E7 fine-tuned e5 (multi-task, epoch 3) alone",
+      "accuracy": 0.8788,
+      "macro_f1": 0.8684,
+      "ece": null,
+      "log_loss": null
+    },
+    {
+      "name": "E8 ensemble E4 + fine-tuned e5 (epoch 3, w=0.9, T=0.5)",
+      "accuracy": 0.8738,
+      "macro_f1": 0.8605,
+      "ece": 0.0147,
+      "log_loss": 0.4205
     }
   ],
   "category_tuning": [
@@ -248,14 +262,470 @@
     }
   ],
   "category_choice": {
-    "emb_C": 100.0,
-    "weight_emb": 0.5,
-    "accuracy": 0.765,
-    "macro_f1": 0.7856,
-    "log_loss": 0.8655,
-    "temperature": 0.6
+    "model": "ensemble tfidf-svm + fine-tuned e5",
+    "C": 1.0,
+    "weight_emb": 0.9,
+    "temperature": 0.5,
+    "epoch": 3
   },
   "validation": {
+    "category": {
+      "accuracy": 0.8738,
+      "macro_f1": 0.8605,
+      "log_loss": 0.4205,
+      "ece": 0.0147,
+      "macro_f1_by_language": {
+        "en": 0.8811,
+        "mixed": 0.8,
+        "si": 0.8615,
+        "singlish": 0.7526,
+        "ta": 0.948,
+        "tanglish": 0.9636
+      },
+      "accuracy_by_language": {
+        "en": 0.875,
+        "mixed": 0.85,
+        "si": 0.9125,
+        "singlish": 0.78,
+        "ta": 0.9667,
+        "tanglish": 0.95
+      }
+    },
+    "heads": {
+      "category_macro_f1": 0.8605,
+      "secondary_f1": 0.84,
+      "secondary_precision": 0.9,
+      "secondary_recall": 0.7875,
+      "secondary_exact_accuracy": 0.975,
+      "urgency_f1": 0.9937,
+      "urgency_precision": 1.0,
+      "urgency_recall": 0.9875,
+      "spam_rule_violations": 0
+    },
+    "human_review": {
+      "threshold": 0.35,
+      "target_auto_accuracy": 0.9,
+      "share_flagged": 0.0375,
+      "accuracy_auto_routed": 0.9,
+      "accuracy_flagged": 0.2
+    },
+    "per_class_f1": {
+      "payment_refund": 0.8259,
+      "ride_trip_issue": 0.9151,
+      "lost_item": 0.8108,
+      "order_missing_wrong": 0.87,
+      "delivery_delay": 0.9496,
+      "food_quality": 0.8302,
+      "account_promo": 0.9412,
+      "safety_conduct": 0.7792,
+      "app_technical": 0.869,
+      "general_inquiry": 0.8,
+      "spam_irrelevant": 0.875
+    },
+    "confusion_matrix": {
+      "labels": [
+        "payment_refund",
+        "ride_trip_issue",
+        "lost_item",
+        "order_missing_wrong",
+        "delivery_delay",
+        "food_quality",
+        "account_promo",
+        "safety_conduct",
+        "app_technical",
+        "general_inquiry",
+        "spam_irrelevant"
+      ],
+      "matrix": [
+        [
+          102,
+          0,
+          1,
+          4,
+          3,
+          3,
+          5,
+          0,
+          6,
+          17,
+          3
+        ],
+        [
+          0,
+          97,
+          0,
+          0,
+          0,
+          0,
+          3,
+          11,
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          30,
+          0,
+          1,
+          0,
+          0,
+          0,
+          7,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          3,
+          87,
+          0,
+          2,
+          1,
+          0,
+          3,
+          0,
+          0
+        ],
+        [
+          1,
+          0,
+          0,
+          1,
+          113,
+          1,
+          0,
+          3,
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          11,
+          1,
+          44,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          72,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          2,
+          0,
+          0,
+          0,
+          0,
+          0,
+          30,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          63,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          40,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          2,
+          21
+        ]
+      ]
+    }
+  },
+  "thresholds": {
+    "urgency": 0.7,
+    "secondary": 0.125,
+    "review": 0.35
+  },
+  "head_choices": {
+    "secondary": {
+      "weight_emb": 0.7,
+      "threshold": 0.45,
+      "f1": 0.6218,
+      "precision": 0.9487,
+      "recall": 0.4625,
+      "exact_accuracy": 0.9437
+    },
+    "urgency": {
+      "weight_emb": 0.5,
+      "threshold": 0.525,
+      "f1": 0.9231,
+      "precision": 0.9474,
+      "recall": 0.9
+    }
+  },
+  "artifact": {
+    "path": "models/ticket_model.joblib",
+    "sha256": "05d691531d17fbc5d27edbe3672fdf4ba077054e2fa08285b95ebd64837a36d1",
+    "encoder_delta_sha256": "37e7e39058e78c2983d33d27e324b629833c9a51c5245362152b597dc3aff1f1",
+    "trained_on": "train + validation"
+  },
+  "finetune_history": [
+    {
+      "epoch": 1,
+      "seconds": 521,
+      "val_acc": 0.7775,
+      "val_macro_f1": 0.7782,
+      "val_urgency_f1": 0.9259
+    },
+    {
+      "epoch": 2,
+      "seconds": 536,
+      "val_acc": 0.8488,
+      "val_macro_f1": 0.8451,
+      "val_urgency_f1": 0.9677
+    },
+    {
+      "epoch": 3,
+      "seconds": 608,
+      "val_acc": 0.8788,
+      "val_macro_f1": 0.8684,
+      "val_urgency_f1": 0.9518
+    },
+    {
+      "epoch": 4,
+      "seconds": 516,
+      "val_acc": 0.865,
+      "val_macro_f1": 0.8576,
+      "val_urgency_f1": 0.9873
+    }
+  ],
+  "ensemble_eval": {
+    "per_epoch": [
+      {
+        "epoch": 1,
+        "ft_alone_acc": 0.7775,
+        "ft_alone_macro_f1": 0.7782,
+        "category": {
+          "weight_emb": 0.7,
+          "accuracy": 0.8325,
+          "macro_f1": 0.8384,
+          "log_loss": 0.771,
+          "ece": 0.2604,
+          "temperature": 0.5,
+          "ece_after_temp": 0.038,
+          "accuracy_by_language": {
+            "en": 0.8786,
+            "mixed": 0.9,
+            "si": 0.7188,
+            "singlish": 0.82,
+            "ta": 0.875,
+            "tanglish": 0.9
+          }
+        },
+        "secondary": {
+          "weight_emb": 0.3,
+          "threshold": 0.175,
+          "f1": 0.6325,
+          "precision": 1.0,
+          "recall": 0.4625
+        },
+        "urgency": {
+          "weight_emb": 0.7,
+          "threshold": 0.425,
+          "f1": 0.9686,
+          "precision": 0.9747,
+          "recall": 0.9625
+        }
+      },
+      {
+        "epoch": 2,
+        "ft_alone_acc": 0.8488,
+        "ft_alone_macro_f1": 0.8451,
+        "category": {
+          "weight_emb": 0.8,
+          "accuracy": 0.85,
+          "macro_f1": 0.8475,
+          "log_loss": 0.7261,
+          "ece": 0.2643,
+          "temperature": 0.5,
+          "ece_after_temp": 0.0308,
+          "accuracy_by_language": {
+            "en": 0.9036,
+            "mixed": 0.85,
+            "si": 0.8125,
+            "singlish": 0.755,
+            "ta": 0.9417,
+            "tanglish": 0.8
+          }
+        },
+        "secondary": {
+          "weight_emb": 1.0,
+          "threshold": 0.175,
+          "f1": 0.7724,
+          "precision": 0.8615,
+          "recall": 0.7
+        },
+        "urgency": {
+          "weight_emb": 0.7,
+          "threshold": 0.325,
+          "f1": 0.9811,
+          "precision": 0.9873,
+          "recall": 0.975
+        }
+      },
+      {
+        "epoch": 3,
+        "ft_alone_acc": 0.8788,
+        "ft_alone_macro_f1": 0.8684,
+        "category": {
+          "weight_emb": 0.9,
+          "accuracy": 0.8738,
+          "macro_f1": 0.8605,
+          "log_loss": 0.6365,
+          "ece": 0.229,
+          "temperature": 0.5,
+          "ece_after_temp": 0.0147,
+          "accuracy_by_language": {
+            "en": 0.875,
+            "mixed": 0.85,
+            "si": 0.9125,
+            "singlish": 0.78,
+            "ta": 0.9667,
+            "tanglish": 0.95
+          }
+        },
+        "secondary": {
+          "weight_emb": 0.7,
+          "threshold": 0.125,
+          "f1": 0.84,
+          "precision": 0.9,
+          "recall": 0.7875
+        },
+        "urgency": {
+          "weight_emb": 0.7,
+          "threshold": 0.7,
+          "f1": 0.9937,
+          "precision": 1.0,
+          "recall": 0.9875
+        }
+      },
+      {
+        "epoch": 4,
+        "ft_alone_acc": 0.865,
+        "ft_alone_macro_f1": 0.8576,
+        "category": {
+          "weight_emb": 0.85,
+          "accuracy": 0.865,
+          "macro_f1": 0.8573,
+          "log_loss": 0.6681,
+          "ece": 0.2493,
+          "temperature": 0.5,
+          "ece_after_temp": 0.0432,
+          "accuracy_by_language": {
+            "en": 0.8857,
+            "mixed": 0.85,
+            "si": 0.875,
+            "singlish": 0.765,
+            "ta": 0.9667,
+            "tanglish": 0.9
+          }
+        },
+        "secondary": {
+          "weight_emb": 1.0,
+          "threshold": 0.2,
+          "f1": 0.8533,
+          "precision": 0.9143,
+          "recall": 0.8
+        },
+        "urgency": {
+          "weight_emb": 1.0,
+          "threshold": 0.4,
+          "f1": 0.9937,
+          "precision": 1.0,
+          "recall": 0.9875
+        }
+      }
+    ],
+    "chosen": {
+      "epoch": 3,
+      "ft_alone_acc": 0.8788,
+      "ft_alone_macro_f1": 0.8684,
+      "category": {
+        "weight_emb": 0.9,
+        "accuracy": 0.8738,
+        "macro_f1": 0.8605,
+        "log_loss": 0.6365,
+        "ece": 0.229,
+        "temperature": 0.5,
+        "ece_after_temp": 0.0147,
+        "accuracy_by_language": {
+          "en": 0.875,
+          "mixed": 0.85,
+          "si": 0.9125,
+          "singlish": 0.78,
+          "ta": 0.9667,
+          "tanglish": 0.95
+        }
+      },
+      "secondary": {
+        "weight_emb": 0.7,
+        "threshold": 0.125,
+        "f1": 0.84,
+        "precision": 0.9,
+        "recall": 0.7875
+      },
+      "urgency": {
+        "weight_emb": 0.7,
+        "threshold": 0.7,
+        "f1": 0.9937,
+        "precision": 1.0,
+        "recall": 0.9875
+      }
+    }
+  },
+  "v1_validation": {
     "category": {
       "accuracy": 0.765,
       "macro_f1": 0.7856,
@@ -469,33 +939,5 @@
         ]
       ]
     }
-  },
-  "thresholds": {
-    "urgency": 0.525,
-    "secondary": 0.45,
-    "review": 0.61
-  },
-  "head_choices": {
-    "secondary": {
-      "weight_emb": 0.7,
-      "threshold": 0.45,
-      "f1": 0.6218,
-      "precision": 0.9487,
-      "recall": 0.4625,
-      "exact_accuracy": 0.9437
-    },
-    "urgency": {
-      "weight_emb": 0.5,
-      "threshold": 0.525,
-      "f1": 0.9231,
-      "precision": 0.9474,
-      "recall": 0.9
-    }
-  },
-  "artifact": {
-    "path": "models/ticket_model.joblib",
-    "sha256": "f9943a6b280407db68c4791635bacf3a07e0f65c3b2f4c3a1e147eca2d348d45",
-    "trained_on": "train + validation",
-    "training_seconds": 58.5
   }
 }

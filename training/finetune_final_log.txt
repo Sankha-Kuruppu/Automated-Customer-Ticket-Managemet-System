@@ -1,0 +1,22 @@
+  ep1 step 50/900 loss=3.698 (105s)
+  ep1 step 100/900 loss=2.824 (209s)
+  ep1 step 150/900 loss=1.757 (322s)
+  ep1 step 200/900 loss=1.298 (419s)
+  ep1 step 250/900 loss=1.234 (511s)
+  ep1 step 300/900 loss=1.139 (617s)
+   {'epoch': 1, 'seconds': 617}
+  ep2 step 350/900 loss=1.006 (94s)
+  ep2 step 400/900 loss=1.008 (199s)
+  ep2 step 450/900 loss=1.023 (310s)
+  ep2 step 500/900 loss=0.930 (435s)
+  ep2 step 550/900 loss=0.942 (604s)
+  ep2 step 600/900 loss=0.925 (20375s)
+   {'epoch': 2, 'seconds': 20375}
+  ep3 step 650/900 loss=0.903 (91s)
+  ep3 step 700/900 loss=0.911 (230s)
+  ep3 step 750/900 loss=0.900 (404s)
+  ep3 step 800/900 loss=0.908 (539s)
+  ep3 step 850/900 loss=0.901 (659s)
+  ep3 step 900/900 loss=0.902 (765s)
+   {'epoch': 3, 'seconds': 765}
+saved encoder delta + heads
