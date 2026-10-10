@@ -29,6 +29,8 @@ and call transcripts. **No LLM is used**: the model is our own trained classifie
 
 ## Quick start
 
+The model files are stored with Git LFS, so install it before cloning (`git lfs install`).
+
 ```bash
 docker build -t rideeat-router .
 docker run -p 8000:8000 -e API_KEY=<key> rideeat-router
@@ -50,7 +52,8 @@ curl -s -X POST localhost:8000/predict -H "X-API-Key: <key>" -H "Content-Type: a
 ```bash
 pip install torch==2.14.1 --index-url https://download.pytorch.org/whl/cpu
 pip install -r requirements-dev.txt
-python training/download_encoder.py           # one-time: fetch multilingual-e5-small
+python training/download_encoder.py           # one-time: fetch the pinned multilingual-e5-small
+python training/apply_delta.py                # one-time: build the fine-tuned encoder (models/encoder_ft)
 API_KEY=dev-key uvicorn app.main:app --port 8000
 ```
 
@@ -79,7 +82,7 @@ Size limits: 1 MB (`/predict`), 5 MB (`/predict/batch`), 25 MB (`/batch/jobs`).
 Unknown routes / methods return JSON `404` / `405`; no input can produce a 5xx.
 
 **Async jobs.** State lives in SQLite (`JOBS_DB_PATH`), processed by one background worker thread
-in chunks of 100 so `/health` and `/predict` stay responsive (measured p95 `/health` = 12–19 ms
+in chunks of 100 so `/health` and `/predict` stay responsive (measured p95 `/health` under 20 ms
 during a 4,800-ticket job). Capacity: 1 running + 3 queued, then `429` + `Retry-After`.
 `Idempotency-Key` returns the existing job. Finished jobs are kept 24 h (contract minimum 6 h),
 then return `410`; unknown ids return `404`; results before success return `409`. On restart,
